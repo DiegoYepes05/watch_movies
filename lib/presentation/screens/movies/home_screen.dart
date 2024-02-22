@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watchmovies/presentation/providers/movies/movies_providers.dart';
+import 'package:watchmovies/presentation/providers/providers.dart';
+
+import 'package:watchmovies/presentation/widgets/widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   static const name = 'home-movies';
@@ -10,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: _HomeView(),
+      bottomNavigationBar: CustomButtonNavigation(),
     );
   }
 }
@@ -31,14 +34,62 @@ class _HomeViewState extends ConsumerState<_HomeView> {
   @override
   Widget build(BuildContext context) {
     final nowPlayingMovie = ref.watch(nowPlayingMoviesProvider);
-    return ListView.builder(
-      itemCount: nowPlayingMovie.length,
-      itemBuilder: (BuildContext context, int index) {
-        final movie = nowPlayingMovie[index];
-        return ListTile(
-          title: Text(movie.title),
-        );
-      },
+    final sliderShow = ref.watch(movieSlideshowProvider);
+
+    return CustomScrollView(
+      slivers: [
+        const SliverAppBar(
+          floating: true,
+          flexibleSpace: FlexibleSpaceBar(title: CustomAppbar()),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return Column(
+                children: [
+                  MoviesSlideshow(movies: sliderShow),
+                  MoviesHorizontalListview(
+                    movies: nowPlayingMovie,
+                    title: 'Cine',
+                    subTitle: 'Lunes 20',
+                    loadNextPage: () => ref
+                        .read(nowPlayingMoviesProvider.notifier)
+                        .loadNextPage(),
+                  ),
+                  MoviesHorizontalListview(
+                    movies: nowPlayingMovie,
+                    title: 'Proximamente',
+                    subTitle: 'En este mes',
+                    loadNextPage: () => ref
+                        .read(nowPlayingMoviesProvider.notifier)
+                        .loadNextPage(),
+                  ),
+                  MoviesHorizontalListview(
+                    movies: nowPlayingMovie,
+                    title: 'populares',
+                    // subTitle: 'En este mes',
+                    loadNextPage: () => ref
+                        .read(nowPlayingMoviesProvider.notifier)
+                        .loadNextPage(),
+                  ),
+                  MoviesHorizontalListview(
+                    movies: nowPlayingMovie,
+                    title: 'Mejor ranqueadas',
+                    subTitle: 'Desde siempre',
+                    loadNextPage: () => ref
+                        .read(nowPlayingMoviesProvider.notifier)
+                        .loadNextPage(),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  )
+                ],
+              );
+            },
+            childCount: 1,
+          ),
+        )
+      ],
     );
   }
 }
