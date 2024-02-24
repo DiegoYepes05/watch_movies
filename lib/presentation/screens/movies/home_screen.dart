@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watchmovies/presentation/providers/movies/initial_loading_provider.dart';
 import 'package:watchmovies/presentation/providers/providers.dart';
 
 import 'package:watchmovies/presentation/widgets/widgets.dart';
@@ -29,11 +30,21 @@ class _HomeViewState extends ConsumerState<_HomeView> {
   void initState() {
     super.initState();
     ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+    ref.read(popularMoviesProvider.notifier).loadNextPage();
+    ref.read(topRaterMoviesProvider.notifier).loadNextPage();
+    ref.read(upComingMoviesProvider.notifier).loadNextPage();
   }
 
   @override
   Widget build(BuildContext context) {
+    final initialLoading = ref.watch(initialLoadingProvider);
+    if (initialLoading) return const FullScreenLoading();
+
     final nowPlayingMovie = ref.watch(nowPlayingMoviesProvider);
+    final popularMovie = ref.watch(popularMoviesProvider);
+    final topRaterMovie = ref.watch(topRaterMoviesProvider);
+    final upComingMovie = ref.watch(upComingMoviesProvider);
+
     final sliderShow = ref.watch(movieSlideshowProvider);
 
     return CustomScrollView(
@@ -57,30 +68,28 @@ class _HomeViewState extends ConsumerState<_HomeView> {
                         .loadNextPage(),
                   ),
                   MoviesHorizontalListview(
-                    movies: nowPlayingMovie,
+                    movies: upComingMovie,
                     title: 'Proximamente',
                     subTitle: 'En este mes',
                     loadNextPage: () => ref
-                        .read(nowPlayingMoviesProvider.notifier)
+                        .read(upComingMoviesProvider.notifier)
                         .loadNextPage(),
                   ),
                   MoviesHorizontalListview(
-                    movies: nowPlayingMovie,
+                    movies: popularMovie,
                     title: 'populares',
                     // subTitle: 'En este mes',
-                    loadNextPage: () => ref
-                        .read(nowPlayingMoviesProvider.notifier)
-                        .loadNextPage(),
+                    loadNextPage: () =>
+                        ref.read(popularMoviesProvider.notifier).loadNextPage(),
                   ),
                   MoviesHorizontalListview(
-                    movies: nowPlayingMovie,
-                    title: 'Mejor ranqueadas',
-                    subTitle: 'Desde siempre',
+                    movies: topRaterMovie,
+                    title: 'Mejor calificadas',
                     loadNextPage: () => ref
-                        .read(nowPlayingMoviesProvider.notifier)
+                        .read(topRaterMoviesProvider.notifier)
                         .loadNextPage(),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   )
                 ],
